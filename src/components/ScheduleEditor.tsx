@@ -219,8 +219,8 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setIsAddOpen(false)} className="px-2.5 py-1.5 text-sm rounded-md border border-black/15 bg-white hover:bg-gray-50">Cancel</button>
-              <button onClick={addPeriodFromModal} className="px-3 py-1.5 text-sm rounded-md bg-[color:var(--accent)] text-white hover:bg-[#195a44]">Add</button>
+              <button onClick={() => setIsAddOpen(false)} className="px-4 py-2 text-base rounded-md border border-black/15 bg-white hover:bg-gray-50">Cancel</button>
+              <button onClick={addPeriodFromModal} className="px-4 py-2 text-base rounded-md bg-[color:var(--accent)] text-white hover:bg-[#195a44]">Add</button>
             </div>
           </div>
         </div>
