@@ -20,6 +20,7 @@ export default function Home() {
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [currentDate, setCurrentDate] = useState<string>("");
   const [currentTime, setCurrentTime] = useState<string>("");
+  const [showEditorMobile, setShowEditorMobile] = useState(false);
 
   useEffect(() => {
     const data = loadSchedule<Schedule>(DEFAULT_SCHEDULE);
@@ -58,16 +59,16 @@ export default function Home() {
   return (
     <div className="min-h-screen" style={{ backgroundImage: "radial-gradient(1200px 600px at 0% -10%, rgba(31,111,84,0.08), transparent), radial-gradient(800px 400px at 100% -10%, rgba(155,191,152,0.15), transparent)" }}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-8 py-8 md:py-12">
-        <header className="mb-6 md:mb-8 flex items-start justify-between gap-4 sm:gap-6">
+        <header className="mb-4 sm:mb-6 md:mb-8 flex flex-col sm:flex-row items-start sm:items-start justify-start sm:justify-between gap-2 sm:gap-6">
           <div>
             <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight" style={{ letterSpacing: "0.2px" }}>
               {headerTitle}
             </h1>
             <p className="text-foreground/70 mt-1 text-sm sm:text-base">Anjuman-e-Mohammedi San Diego</p>
           </div>
-          <div className="text-right shrink-0">
+          <div className="text-left sm:text-right shrink-0 mt-2 sm:mt-0">
             <div className="text-xs sm:text-sm text-foreground/60">Today</div>
-            <div className="text-base sm:text-lg font-medium">
+            <div className="text-base sm:text-lg font-medium leading-snug">
               {currentDate || "Loading..."}
             </div>
             <div className="text-lg sm:text-xl font-bold tabular-nums mt-1 text-[color:var(--accent)]">
@@ -76,11 +77,20 @@ export default function Home() {
           </div>
         </header>
 
+        <div className="flex justify-end mb-4 xl:hidden">
+          <button
+            onClick={() => setShowEditorMobile((prev) => !prev)}
+            className="px-3 py-1.5 btn-outline text-sm"
+          >
+            {showEditorMobile ? "Hide editor" : "Edit schedule"}
+          </button>
+        </div>
+
         {schedule === null ? (
           <div className="min-h-[50vh] md:h-[calc(100vh-200px)] flex items-center justify-center text-foreground/60">Loading…</div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 md:h-[calc(100vh-200px)]">
-            <div className="xl:col-span-2 h-auto md:h-full min-h-0">
+            <div className={`order-2 xl:order-1 xl:col-span-2 h-auto md:h-full min-h-0 ${showEditorMobile ? "block" : "hidden"} xl:block`}>
               <ScheduleEditor
                 value={schedule}
                 onChange={onChange}
@@ -88,7 +98,7 @@ export default function Home() {
                 onDeleteAll={() => onChange([])}
               />
             </div>
-            <div className="xl:col-span-1 flex flex-col gap-4 h-auto md:h-full min-h-0">
+            <div className="order-1 xl:order-2 xl:col-span-1 flex flex-col gap-4 h-auto md:h-full min-h-0">
               <Countdown schedule={schedule} />
               <SchedulePreview schedule={schedule} />
             </div>
