@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useLayoutEffect, useRef } from "react";
 import { type Period, type Schedule, normalizeSchedule } from "@/lib/schedule";
 
 type Props = {
@@ -33,12 +33,26 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
   const sortedDraft = useMemo(() => normalizeSchedule(draft), [draft]);
 
   // Keep local draft in sync when parent value changes (e.g., after loading from storage)
-  useEffect(() => {
+  // Use layout effect so this runs before other effects that might propagate changes upward
+  useLayoutEffect(() => {
     // Avoid unnecessary state churn to prevent loops
     if (JSON.stringify(value) !== JSON.stringify(draft)) {
       setDraft(value);
     }
-  }, [value, draft]);
+    // Only depend on value; including draft can cause redundant runs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  // Keep refs of latest props to avoid effect dependency loops
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   function openAddModal() {
     const p = createEmptyPeriod();
@@ -76,10 +90,10 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
   // Propagate changes to parent after render, avoiding parent updates during child render
   useEffect(() => {
     const normalized = normalizeSchedule(draft);
-    if (JSON.stringify(normalized) !== JSON.stringify(value)) {
-      onChange(normalized);
+    if (JSON.stringify(normalized) !== JSON.stringify(valueRef.current)) {
+      onChangeRef.current(normalized);
     }
-  }, [draft, value, onChange]);
+  }, [draft]);
 
   return (
     <div className="w-full h-full min-h-0 flex flex-col">
