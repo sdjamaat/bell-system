@@ -185,9 +185,9 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
 
       {isAddOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="card w-full max-w-md p-4">
-            <div className="text-lg font-semibold font-display mb-2">Add period</div>
-            <div className="grid grid-cols-1 gap-3">
+          <div className="card w-full max-w-md p-6 md:p-7">
+            <div className="text-lg font-semibold font-display mb-4">Add period</div>
+            <div className="grid grid-cols-1 gap-4">
               <div className="flex flex-col">
                 <label className="text-sm mb-0.5 text-foreground/70">Name</label>
                 <input
@@ -197,7 +197,7 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
                   className="px-3 py-2 text-base rounded-md border border-black/10 bg-white"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col">
                   <label className="text-sm mb-0.5 text-foreground/70">Start</label>
                   <input
@@ -218,7 +218,7 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
                 </div>
               </div>
             </div>
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="flex justify-end gap-3 mt-6">
               <button onClick={() => setIsAddOpen(false)} className="px-2.5 py-1.5 text-sm rounded-md border border-black/15 bg-white hover:bg-gray-50">Cancel</button>
               <button onClick={addPeriodFromModal} className="px-3 py-1.5 text-sm rounded-md bg-[color:var(--accent)] text-white hover:bg-[#195a44]">Add</button>
             </div>
