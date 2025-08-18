@@ -96,10 +96,10 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
   }, [draft]);
 
   return (
-    <div className="w-full h-full min-h-0 flex flex-col">
-      <div className="flex items-center justify-between mb-3 pr-2">
-        <h2 className="text-2xl font-semibold font-display">Schedule</h2>
-        <div className="flex items-center gap-2">
+    <div className="w-full h-auto md:h-full min-h-0 flex flex-col">
+      <div className="flex items-center justify-between mb-3 pr-0 md:pr-2 gap-2 flex-wrap">
+        <h2 className="text-xl sm:text-2xl font-semibold font-display">Schedule</h2>
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           {onResetAll && (
             <button
               onClick={onResetAll}
@@ -128,8 +128,8 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="grid grid-cols-1 gap-2.5 pr-2">
+      <div className="flex-1 min-h-0 overflow-visible md:overflow-y-auto">
+        <div className="grid grid-cols-1 gap-2.5 pr-0 md:pr-2">
           {sortedDraft.length === 0 && (
             <div className="card p-4 text-sm text-foreground/70">
               No periods yet. Click &quot;Add period&quot; to get started.
@@ -141,7 +141,7 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
               key={p.id}
               className="rounded-lg border border-black/10 p-3 bg-white/60 backdrop-blur-sm"
             >
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_auto] gap-3 items-end">
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_auto] gap-2 md:gap-3 items-end">
                 <div className="flex flex-col">
                   <label className="text-sm mb-0.5 text-foreground/70">Name</label>
                   <input
@@ -169,7 +169,7 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
                     className="px-3 py-2 text-base rounded-md border border-black/10 bg-white"
                   />
                 </div>
-                <div className="flex gap-2 md:justify-end">
+                <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => remove(p.id)}
                     className="px-2.5 py-1.5 text-base rounded-md border border-red-200 text-red-700 hover:bg-red-50"

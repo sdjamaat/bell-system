@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Nunito, Merriweather } from "next/font/google";
 import "./globals.css";
 
@@ -26,6 +26,11 @@ const display = Merriweather({
 export const metadata: Metadata = {
   title: "Madressa Bell System",
   description: "Simple bell schedule and chimes for classrooms",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
