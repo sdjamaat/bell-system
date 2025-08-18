@@ -1,103 +1,102 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import ScheduleEditor from "@/components/ScheduleEditor";
+import Countdown from "@/components/Countdown";
+import SchedulePreview from "@/components/SchedulePreview";
+import { type Schedule, normalizeSchedule } from "@/lib/schedule";
+import { loadSchedule, saveSchedule } from "@/lib/storage";
+
+const DEFAULT_SCHEDULE: Schedule = [
+  { id: "p1", name: "Period 1", start: "08:00", end: "08:45" },
+  { id: "p2", name: "Period 2", start: "08:50", end: "09:35" },
+  { id: "p3", name: "Period 3", start: "09:45", end: "10:30" },
+  { id: "brk", name: "Break", start: "10:30", end: "10:45" },
+  { id: "p4", name: "Period 4", start: "10:45", end: "11:30" },
+  { id: "p5", name: "Period 5", start: "11:35", end: "12:20" },
+];
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [currentDate, setCurrentDate] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState<string>("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  useEffect(() => {
+    const data = loadSchedule<Schedule>(DEFAULT_SCHEDULE);
+    setSchedule(normalizeSchedule(data));
+    
+    // Set date on client side to avoid hydration mismatch
+    setCurrentDate(new Date().toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }));
+    
+    // Update time every second
+    const updateTime = () => {
+      setCurrentTime(new Date().toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }));
+    };
+    
+    updateTime(); // Set initial time
+    const timeInterval = setInterval(updateTime, 1000);
+    
+    return () => clearInterval(timeInterval);
+  }, []);
+
+  const onChange = (next: Schedule) => {
+    const normalized = normalizeSchedule(next);
+    setSchedule(normalized);
+    saveSchedule(normalized);
+  };
+
+  const headerTitle = useMemo(() => "Madresa Bell System", []);
+
+  return (
+    <div className="min-h-screen" style={{ backgroundImage: "radial-gradient(1200px 600px at 0% -10%, rgba(31,111,84,0.08), transparent), radial-gradient(800px 400px at 100% -10%, rgba(155,191,152,0.15), transparent)" }}>
+      <div className="mx-auto max-w-6xl px-8 py-12">
+        <header className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="font-display text-3xl md:text-4xl font-semibold leading-tight" style={{ letterSpacing: "0.2px" }}>
+              {headerTitle}
+            </h1>
+            <p className="text-foreground/70 mt-1">Anjuman-e-Mohammedi San Diego</p>
+          </div>
+          <div className="text-right">
+            <div className="text-sm text-foreground/60">Today</div>
+            <div className="text-lg font-medium">
+              {currentDate || "Loading..."}
+            </div>
+            <div className="text-xl font-bold tabular-nums mt-1 text-[color:var(--accent)]">
+              {currentTime || "Loading..."}
+            </div>
+          </div>
+        </header>
+
+        {schedule === null ? (
+          <div className="h-[calc(100vh-200px)] flex items-center justify-center text-foreground/60">Loading…</div>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+            <div className="xl:col-span-2 h-full min-h-0">
+              <ScheduleEditor
+                value={schedule}
+                onChange={onChange}
+                onResetAll={() => onChange(DEFAULT_SCHEDULE)}
+                onDeleteAll={() => onChange([])}
+              />
+            </div>
+            <div className="xl:col-span-1 flex flex-col gap-4 h-full min-h-0">
+              <Countdown schedule={schedule} />
+              <SchedulePreview schedule={schedule} />
+            </div>
+          </div>
+        )}
+
+
+      </div>
     </div>
   );
 }

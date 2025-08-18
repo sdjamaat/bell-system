@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fcfaf2; /* soft cream */
+  --foreground: #1b1b1b;
+  --accent: #1f6f54; /* madrasa green */
+  --accent-2: #9bbf98; /* soft green */
 }
 
 @theme inline {
@@ -10,17 +12,37 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Disable dark mode theming; keep a consistent, bright, calm palette */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.font-display { font-family: var(--font-display), ui-sans-serif, system-ui; }
+
+/* Utility tokens for soft cards and borders */
+.card {
+  background: #ffffffcc;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  backdrop-filter: blur(6px);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-radius: 10px;
+}
+
+.btn-primary:hover { background: #195a44; }
+
+.btn-outline {
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 10px;
 }
