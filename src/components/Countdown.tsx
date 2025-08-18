@@ -9,6 +9,7 @@ import {
   getNowMinutes,
 } from "@/lib/schedule";
 import { bellPlayer } from "@/lib/bell";
+import { loadSoundEnabled, saveSoundEnabled } from "@/lib/storage";
 
 type Props = {
   schedule: Schedule;
@@ -27,6 +28,12 @@ export default function Countdown({ schedule }: Props) {
     const timer = setTimeout(() => setLoading(false), 100);
     return () => clearTimeout(timer);
   }, [schedule, now]);
+
+  // Load persisted sound preference once on mount
+  useEffect(() => {
+    const persisted = loadSoundEnabled(false);
+    setEnabled(persisted);
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 250);
@@ -78,15 +85,17 @@ export default function Countdown({ schedule }: Props) {
                 aria-label="Toggle sound"
                 aria-pressed={enabled}
                 onClick={async () => {
-                  if (!enabled) {
+                  const next = !enabled;
+                  if (next) {
                     await bellPlayer.unlock();
                   }
-                  setEnabled((v) => !v);
+                  setEnabled(next);
+                  saveSoundEnabled(next);
                 }}
-                className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors ${enabled ? "bg-[color:var(--accent)]" : "bg-gray-300"}`}
+                className={`relative inline-flex h-6 w-10 items-center rounded-full p-0.5 transition-colors ${enabled ? "bg-[color:var(--accent)]" : "bg-gray-300"}`}
               >
                 <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${enabled ? "translate-x-5" : "translate-x-1"}`}
+                  className={`inline-block h-5 w-5 rounded-full bg-white transition-transform ${enabled ? "translate-x-4" : "translate-x-0"}`}
                 />
               </button>
             </div>

@@ -53,7 +53,7 @@ export default function Home() {
     saveSchedule(normalized);
   };
 
-  const headerTitle = useMemo(() => "Madresa Bell System", []);
+  const headerTitle = useMemo(() => "Madressa Bell System", []);
 
   return (
     <div className="min-h-screen" style={{ backgroundImage: "radial-gradient(1200px 600px at 0% -10%, rgba(31,111,84,0.08), transparent), radial-gradient(800px 400px at 100% -10%, rgba(155,191,152,0.15), transparent)" }}>

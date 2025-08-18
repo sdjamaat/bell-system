@@ -24,7 +24,7 @@ const display = Merriweather({
 });
 
 export const metadata: Metadata = {
-  title: "Madresa Bell System",
+  title: "Madressa Bell System",
   description: "Simple bell schedule and chimes for classrooms",
 };
 

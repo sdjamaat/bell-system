@@ -58,8 +58,11 @@ export class BellPlayer {
       
       source.connect(gainNode);
       gainNode.connect(ctx.destination);
-      
-      source.start(0);
+
+      // Skip initial silence at the beginning of the file
+      const TRIM_LEAD_SILENCE_SEC = 0.9;
+      const offset = Math.min(TRIM_LEAD_SILENCE_SEC, Math.max(0, buffer.duration - 0.01));
+      source.start(0, offset);
     } catch (error) {
       console.error('Failed to play bell sound:', error);
       // Fallback to generated sound
