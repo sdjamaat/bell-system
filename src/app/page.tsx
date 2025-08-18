@@ -77,20 +77,22 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="flex justify-end mb-4 xl:hidden">
-          <button
-            onClick={() => setShowEditorMobile((prev) => !prev)}
-            className="px-3 py-1.5 btn-outline text-sm"
-          >
-            {showEditorMobile ? "Hide editor" : "Edit schedule"}
-          </button>
-        </div>
+        
 
         {schedule === null ? (
           <div className="min-h-[50vh] md:h-[calc(100vh-200px)] flex items-center justify-center text-foreground/60">Loading…</div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 md:gap-6 md:h-[calc(100vh-200px)]">
-            <div className={`order-2 xl:order-1 xl:col-span-2 h-auto md:h-full min-h-0 ${showEditorMobile ? "block" : "hidden"} xl:block`}>
+            <div className="order-2 xl:hidden">
+              <button
+                onClick={() => setShowEditorMobile((prev) => !prev)}
+                className="px-3 py-1.5 btn-outline text-sm w-full sm:w-auto"
+              >
+                {showEditorMobile ? "Hide editor" : "Edit schedule"}
+              </button>
+            </div>
+            
+            <div className={`order-3 xl:order-1 xl:col-span-2 h-auto md:h-full min-h-0 ${showEditorMobile ? "block" : "hidden"} xl:block`}>
               <ScheduleEditor
                 value={schedule}
                 onChange={onChange}

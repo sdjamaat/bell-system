@@ -99,7 +99,7 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
     <div className="w-full h-auto md:h-full min-h-0 flex flex-col">
       <div className="flex items-center justify-between mb-3 pr-0 md:pr-2 gap-2 flex-wrap">
         <h2 className="text-xl sm:text-2xl font-semibold font-display">Schedule</h2>
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
           {onResetAll && (
             <button
               onClick={onResetAll}
@@ -228,5 +228,3 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
     </div>
   );
 }
-
-
