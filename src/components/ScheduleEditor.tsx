@@ -64,23 +64,33 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
       if (prevTop !== undefined && nextTop !== undefined) {
         const deltaY = prevTop - nextTop;
         if (deltaY !== 0) {
-          el.style.transition = "none";
-          el.style.willChange = "transform";
-          el.style.transform = `translate3d(0, ${deltaY}px, 0)`;
-          // Ensure the initial transform is committed before animating back to 0
-          requestAnimationFrame(() => {
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          el.classList.add("flip-item");
+          if (!prefersReducedMotion) {
+            el.style.transition = "none";
+            el.style.willChange = "transform, opacity";
+            el.style.transform = `translate3d(0, ${deltaY}px, 0)`;
+            el.style.opacity = "0.96";
             requestAnimationFrame(() => {
-              el.style.transition = "transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1)";
-              el.style.transform = "";
-              // Add highlight flash only for the card that was just edited
-              if (p.id === lastEditedId) {
-                el.classList.add("moved-flash");
-                appliedHighlight = true;
-              }
+              requestAnimationFrame(() => {
+                el.classList.add("flip-animating");
+                el.style.transition = "";
+                el.style.transform = "";
+                el.style.opacity = "";
+                if (p.id === lastEditedId) {
+                  el.classList.add("moved-flash", "moved-hold");
+                  appliedHighlight = true;
+                  // Keep subtle border lit for a bit after settling
+                  setTimeout(() => {
+                    el.classList.remove("moved-hold");
+                  }, 1400);
+                }
+              });
             });
-          });
+          }
           const handle = (ev: TransitionEvent) => {
             if (ev.propertyName !== "transform") return;
+            el.classList.remove("flip-animating");
             el.style.transition = "";
             el.style.willChange = "";
             el.style.transform = "";
@@ -173,10 +183,10 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
   }, [draft, editingPeriodId]);
 
   return (
-    <div className="w-full h-full min-h-0 flex flex-col">
-      <div className="flex items-center justify-between mb-3 pr-2">
-        <h2 className="text-2xl font-semibold font-display">Schedule</h2>
-        <div className="flex items-center gap-2">
+    <div className="w-full h-auto md:h-full min-h-0 flex flex-col">
+      <div className="flex items-center justify-between mb-3 pr-0 md:pr-2 gap-2 flex-wrap">
+        <h2 className="text-xl sm:text-2xl font-semibold font-display">Schedule</h2>
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
           {onResetAll && (
             <button
               onClick={onResetAll}
@@ -229,7 +239,7 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
                 itemRefs.current[p.id] = el;
               }}
             >
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_auto] gap-3 items-end">
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_auto] gap-2 md:gap-3 items-end">
                 <div className="flex flex-col">
                   <label className="text-sm mb-0.5 text-foreground/70">Name</label>
                   <input
@@ -257,7 +267,7 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
                     className="px-3 py-2 text-base rounded-md border border-black/10 bg-white"
                   />
                 </div>
-                <div className="flex gap-2 md:justify-end">
+                <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => remove(p.id)}
                     className="px-2.5 py-1.5 text-base rounded-md border border-red-200 text-red-700 hover:bg-red-50"
@@ -316,5 +326,3 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
     </div>
   );
 }
-
-
