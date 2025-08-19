@@ -205,7 +205,6 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
         </div>
       </div>
 
-<<<<<<< HEAD
       <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="grid grid-cols-1 gap-2.5 pr-2">
           {displayedPeriods.length === 0 && (
