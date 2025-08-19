@@ -1,6 +1,6 @@
 "use client";
 
-import { type Schedule, minutesToTimeString, timeStringToMinutes } from "@/lib/schedule";
+import { type Schedule, minutesToTimeString, timeStringToMinutes, minutesToTimeString12h } from "@/lib/schedule";
 
 type Props = { schedule: Schedule };
 
@@ -22,7 +22,7 @@ export default function SchedulePreview({ schedule }: Props) {
               >
                 <div className="font-medium truncate max-w-full">{p.name}</div>
                 <div className="text-sm tabular-nums text-foreground/80 whitespace-nowrap">
-                  {p.start} – {p.end}
+                  {minutesToTimeString12h(start)} – {minutesToTimeString12h(end)}
                   <span className="ml-1 text-foreground/50">
                     ({minutesToTimeString(duration).replace(/^[0-9]{2}:/, "")})
                   </span>

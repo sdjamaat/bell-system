@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useLayoutEffect, useRef } from "react";
-import { type Period, type Schedule, normalizeSchedule } from "@/lib/schedule";
+import { type Period, type Schedule, normalizeSchedule, sortSchedule, isValidTime } from "@/lib/schedule";
 
 type Props = {
   value: Schedule;
@@ -29,8 +29,76 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
   const [addName, setAddName] = useState("");
   const [addStart, setAddStart] = useState("08:00");
   const [addEnd, setAddEnd] = useState("08:45");
+  const [editingPeriodId, setEditingPeriodId] = useState<string | null>(null);
+  const [lastEditedId, setLastEditedId] = useState<string | null>(null);
+  const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const prevPositionsRef = useRef<Record<string, number>>({});
 
-  const sortedDraft = useMemo(() => normalizeSchedule(draft), [draft]);
+  const displayedPeriods = useMemo(
+    () => (editingPeriodId ? draft : sortSchedule(draft)),
+    [draft, editingPeriodId]
+  );
+
+  // Animate list reordering using a small FLIP animation when sorting resumes after editing
+  useLayoutEffect(() => {
+    // Measure current positions
+    const currentPositions: Record<string, number> = {};
+    for (const p of displayedPeriods) {
+      const el = itemRefs.current[p.id];
+      if (el) currentPositions[p.id] = el.getBoundingClientRect().top;
+    }
+
+    // If we are editing, just update the baseline and skip animation
+    if (editingPeriodId !== null) {
+      prevPositionsRef.current = currentPositions;
+      return;
+    }
+
+    const prev = prevPositionsRef.current;
+    let appliedHighlight = false;
+    for (const p of displayedPeriods) {
+      const el = itemRefs.current[p.id];
+      if (!el) continue;
+      const prevTop = prev[p.id];
+      const nextTop = currentPositions[p.id];
+      if (prevTop !== undefined && nextTop !== undefined) {
+        const deltaY = prevTop - nextTop;
+        if (deltaY !== 0) {
+          el.style.transition = "none";
+          el.style.willChange = "transform";
+          el.style.transform = `translate3d(0, ${deltaY}px, 0)`;
+          // Ensure the initial transform is committed before animating back to 0
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              el.style.transition = "transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1)";
+              el.style.transform = "";
+              // Add highlight flash only for the card that was just edited
+              if (p.id === lastEditedId) {
+                el.classList.add("moved-flash");
+                appliedHighlight = true;
+              }
+            });
+          });
+          const handle = (ev: TransitionEvent) => {
+            if (ev.propertyName !== "transform") return;
+            el.style.transition = "";
+            el.style.willChange = "";
+            el.style.transform = "";
+            el.classList.remove("moved-flash");
+            el.removeEventListener("transitionend", handle as EventListener);
+          };
+          el.addEventListener("transitionend", handle as EventListener);
+        }
+      }
+    }
+
+    // Update baseline after animating
+    prevPositionsRef.current = currentPositions;
+    if (appliedHighlight) {
+      // Clear the last edited marker after this cycle
+      setTimeout(() => setLastEditedId(null), 0);
+    }
+  }, [displayedPeriods, editingPeriodId, lastEditedId]);
 
   // Keep local draft in sync when parent value changes (e.g., after loading from storage)
   // Use layout effect so this runs before other effects that might propagate changes upward
@@ -87,13 +155,22 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
     setDraft((prev) => prev.filter((p) => p.id !== id));
   }
 
-  // Propagate changes to parent after render, avoiding parent updates during child render
+  // Propagate changes to parent only when all periods are valid,
+  // so temporary invalid edits (e.g., clearing a time field) don't delete periods.
   useEffect(() => {
+    // Avoid propagating while a period is actively being edited
+    if (editingPeriodId !== null) return;
+
+    const allValid = draft.every(
+      (p) => p.name.trim().length > 0 && isValidTime(p.start) && isValidTime(p.end)
+    );
+    if (!allValid) return;
+
     const normalized = normalizeSchedule(draft);
     if (JSON.stringify(normalized) !== JSON.stringify(valueRef.current)) {
       onChangeRef.current(normalized);
     }
-  }, [draft]);
+  }, [draft, editingPeriodId]);
 
   return (
     <div className="w-full h-auto md:h-full min-h-0 flex flex-col">
@@ -128,18 +205,30 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-visible md:overflow-y-auto">
-        <div className="grid grid-cols-1 gap-2.5 pr-0 md:pr-2">
-          {sortedDraft.length === 0 && (
+<<<<<<< HEAD
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="grid grid-cols-1 gap-2.5 pr-2">
+          {displayedPeriods.length === 0 && (
             <div className="card p-4 text-sm text-foreground/70">
               No periods yet. Click &quot;Add period&quot; to get started.
             </div>
           )}
 
-          {sortedDraft.map((p) => (
+          {displayedPeriods.map((p) => (
             <div
               key={p.id}
               className="rounded-lg border border-black/10 p-3 bg-white/60 backdrop-blur-sm"
+              onFocus={() => setEditingPeriodId(p.id)}
+              onBlur={(e) => {
+                const nextTarget = e.relatedTarget as Node | null;
+                if (!nextTarget || !e.currentTarget.contains(nextTarget)) {
+                  setLastEditedId(p.id);
+                  setEditingPeriodId((current) => (current === p.id ? null : current));
+                }
+              }}
+              ref={(el) => {
+                itemRefs.current[p.id] = el;
+              }}
             >
               <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_auto] gap-2 md:gap-3 items-end">
                 <div className="flex flex-col">

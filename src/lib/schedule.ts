@@ -22,6 +22,15 @@ export function minutesToTimeString(totalMinutes: number): string {
   return `${hh}:${mm}`;
 }
 
+export function minutesToTimeString12h(totalMinutes: number): string {
+  const minutes = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
+  const hours24 = Math.floor(minutes / 60);
+  const mm = (minutes % 60).toString().padStart(2, "0");
+  const period = hours24 >= 12 ? "PM" : "AM";
+  const hours12 = ((hours24 + 11) % 12) + 1; // 0 -> 12
+  return `${hours12}:${mm} ${period}`;
+}
+
 export function getNowMinutes(now: Date = new Date()): number {
   return now.getHours() * 60 + now.getMinutes();
 }

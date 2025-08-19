@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  type Schedule,
-  formatHMS,
-  getCurrentPeriod,
-  getNextBellDate,
-  getNowMinutes,
-} from "@/lib/schedule";
+import { type Schedule, getCurrentPeriod, getNextBellDate, getNowMinutes } from "@/lib/schedule";
 import { bellPlayer } from "@/lib/bell";
 import { loadSoundEnabled, saveSoundEnabled } from "@/lib/storage";
 
@@ -57,15 +51,16 @@ export default function Countdown({ schedule }: Props) {
     return p?.name ?? "—";
   }, [schedule, now]);
 
-  const remainingLabel = useMemo(() => {
-    if (loading) return "Loading...";
-    if (!target) return "No bells scheduled";
+  const remainingParts = useMemo(() => {
+    if (loading) return null;
+    if (!target) return null;
     const diffMs = Math.max(0, target.getTime() - now.getTime());
     const totalSeconds = Math.floor(diffMs / 1000);
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = totalSeconds % 60;
-    return formatHMS(h, m, s);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return { h: pad(h), m: pad(m), s: pad(s) };
   }, [target, now, loading]);
 
   const nextBellTimeLabel = useMemo(() => {
@@ -105,7 +100,18 @@ export default function Countdown({ schedule }: Props) {
 
         <div className="text-center">
           <div className="text-sm text-foreground/60">Next bell in</div>
-          <div className="text-2xl sm:text-3xl font-bold tabular-nums text-[color:var(--accent)] mt-0.5">{remainingLabel}</div>
+          {remainingParts ? (
+            <div className="mt-1 leading-none tracking-tight">
+              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">{remainingParts.h}</span>
+              <span className="ml-1 mr-3 text-base md:text-lg text-foreground/60 align-[2px]">hrs</span>
+              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">{remainingParts.m}</span>
+              <span className="ml-1 mr-3 text-base md:text-lg text-foreground/60 align-[2px]">mins</span>
+              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">{remainingParts.s}</span>
+              <span className="ml-1 text-base md:text-lg text-foreground/60 align-[2px]">secs</span>
+            </div>
+          ) : (
+            <div className="text-base md:text-lg font-medium text-foreground/70 mt-1">{loading ? "Loading..." : "No bells scheduled"}</div>
+          )}
           {nextBellTimeLabel && (
             <div className="text-xs text-foreground/60 mt-0.5">at {nextBellTimeLabel}</div>
           )}
