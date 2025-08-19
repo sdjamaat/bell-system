@@ -78,8 +78,12 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
                 el.style.transform = "";
                 el.style.opacity = "";
                 if (p.id === lastEditedId) {
-                  el.classList.add("moved-flash");
+                  el.classList.add("moved-flash", "moved-hold");
                   appliedHighlight = true;
+                  // Keep subtle border lit for a bit after settling
+                  setTimeout(() => {
+                    el.classList.remove("moved-hold");
+                  }, 1400);
                 }
               });
             });
