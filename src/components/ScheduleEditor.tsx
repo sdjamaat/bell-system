@@ -64,23 +64,29 @@ export default function ScheduleEditor({ value, onChange, onResetAll, onDeleteAl
       if (prevTop !== undefined && nextTop !== undefined) {
         const deltaY = prevTop - nextTop;
         if (deltaY !== 0) {
-          el.style.transition = "none";
-          el.style.willChange = "transform";
-          el.style.transform = `translate3d(0, ${deltaY}px, 0)`;
-          // Ensure the initial transform is committed before animating back to 0
-          requestAnimationFrame(() => {
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          el.classList.add("flip-item");
+          if (!prefersReducedMotion) {
+            el.style.transition = "none";
+            el.style.willChange = "transform, opacity";
+            el.style.transform = `translate3d(0, ${deltaY}px, 0)`;
+            el.style.opacity = "0.96";
             requestAnimationFrame(() => {
-              el.style.transition = "transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1)";
-              el.style.transform = "";
-              // Add highlight flash only for the card that was just edited
-              if (p.id === lastEditedId) {
-                el.classList.add("moved-flash");
-                appliedHighlight = true;
-              }
+              requestAnimationFrame(() => {
+                el.classList.add("flip-animating");
+                el.style.transition = "";
+                el.style.transform = "";
+                el.style.opacity = "";
+                if (p.id === lastEditedId) {
+                  el.classList.add("moved-flash");
+                  appliedHighlight = true;
+                }
+              });
             });
-          });
+          }
           const handle = (ev: TransitionEvent) => {
             if (ev.propertyName !== "transform") return;
+            el.classList.remove("flip-animating");
             el.style.transition = "";
             el.style.willChange = "";
             el.style.transform = "";
