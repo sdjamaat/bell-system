@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { type Schedule, getCurrentPeriod, getNextBellDate, getNowMinutes } from "@/lib/schedule";
+import {
+  type Schedule,
+  getCurrentPeriod,
+  getNextBellDate,
+  getNowMinutes,
+} from "@/lib/schedule";
 import { bellPlayer } from "@/lib/bell";
 import { loadSoundEnabled, saveSoundEnabled } from "@/lib/storage";
 
@@ -12,7 +17,7 @@ type Props = {
 export default function Countdown({ schedule }: Props) {
   const [now, setNow] = useState<Date>(new Date());
   const [target, setTarget] = useState<Date | null>(null);
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true); // Default to sound enabled
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +30,7 @@ export default function Countdown({ schedule }: Props) {
 
   // Load persisted sound preference once on mount
   useEffect(() => {
-    const persisted = loadSoundEnabled(false);
+    const persisted = loadSoundEnabled(true); // Default to sound enabled
     setEnabled(persisted);
   }, []);
 
@@ -65,7 +70,10 @@ export default function Countdown({ schedule }: Props) {
 
   const nextBellTimeLabel = useMemo(() => {
     if (!target) return "";
-    return target.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    return target.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   }, [target]);
 
   return (
@@ -75,7 +83,9 @@ export default function Countdown({ schedule }: Props) {
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm text-foreground/60">Current period</div>
             <div className="flex items-center gap-2 select-none">
-              <span className="text-sm text-foreground/70">{enabled ? "Sound on" : "Sound off"}</span>
+              <span className="text-sm text-foreground/70">
+                {enabled ? "Sound on" : "Sound off"}
+              </span>
               <button
                 aria-label="Toggle sound"
                 aria-pressed={enabled}
@@ -87,33 +97,55 @@ export default function Countdown({ schedule }: Props) {
                   setEnabled(next);
                   saveSoundEnabled(next);
                 }}
-                className={`relative inline-flex h-6 w-10 items-center rounded-full p-0.5 transition-colors ${enabled ? "bg-[color:var(--accent)]" : "bg-gray-300"}`}
+                className={`relative inline-flex h-6 w-10 items-center rounded-full p-0.5 transition-colors ${
+                  enabled ? "bg-[color:var(--accent)]" : "bg-gray-300"
+                }`}
               >
                 <span
-                  className={`inline-block h-5 w-5 rounded-full bg-white transition-transform ${enabled ? "translate-x-4" : "translate-x-0"}`}
+                  className={`inline-block h-5 w-5 rounded-full bg-white transition-transform ${
+                    enabled ? "translate-x-4" : "translate-x-0"
+                  }`}
                 />
               </button>
             </div>
           </div>
-          <div className="text-base font-semibold font-display mt-0.5">{currentPeriodName}</div>
+          <div className="text-base font-semibold font-display mt-0.5">
+            {currentPeriodName}
+          </div>
         </div>
 
         <div className="text-center">
           <div className="text-sm text-foreground/60">Next bell in</div>
           {remainingParts ? (
             <div className="mt-1 leading-none tracking-tight">
-              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">{remainingParts.h}</span>
-              <span className="ml-1 mr-3 text-base md:text-lg text-foreground/60 align-[2px]">hrs</span>
-              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">{remainingParts.m}</span>
-              <span className="ml-1 mr-3 text-base md:text-lg text-foreground/60 align-[2px]">mins</span>
-              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">{remainingParts.s}</span>
-              <span className="ml-1 text-base md:text-lg text-foreground/60 align-[2px]">secs</span>
+              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">
+                {remainingParts.h}
+              </span>
+              <span className="ml-1 mr-3 text-base md:text-lg text-foreground/60 align-[2px]">
+                hrs
+              </span>
+              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">
+                {remainingParts.m}
+              </span>
+              <span className="ml-1 mr-3 text-base md:text-lg text-foreground/60 align-[2px]">
+                mins
+              </span>
+              <span className="text-2xl md:text-3xl lg:text-4xl font-semibold tabular-nums text-[color:var(--accent)]">
+                {remainingParts.s}
+              </span>
+              <span className="ml-1 text-base md:text-lg text-foreground/60 align-[2px]">
+                secs
+              </span>
             </div>
           ) : (
-            <div className="text-base md:text-lg font-medium text-foreground/70 mt-1">{loading ? "Loading..." : "No bells scheduled"}</div>
+            <div className="text-base md:text-lg font-medium text-foreground/70 mt-1">
+              {loading ? "Loading..." : "No bells scheduled"}
+            </div>
           )}
           {nextBellTimeLabel && (
-            <div className="text-xs text-foreground/60 mt-0.5">at {nextBellTimeLabel}</div>
+            <div className="text-xs text-foreground/60 mt-0.5">
+              at {nextBellTimeLabel}
+            </div>
           )}
         </div>
 
@@ -129,5 +161,3 @@ export default function Countdown({ schedule }: Props) {
     </div>
   );
 }
-
-
