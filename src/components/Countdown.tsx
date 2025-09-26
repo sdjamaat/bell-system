@@ -8,7 +8,7 @@ import {
   getNowMinutes,
 } from "@/lib/schedule";
 import { bellPlayer } from "@/lib/bell";
-import { loadSoundEnabled, saveSoundEnabled } from "@/lib/storage";
+// Sound preference is not persisted - always defaults to enabled on page load
 
 type Props = {
   schedule: Schedule;
@@ -19,6 +19,7 @@ export default function Countdown({ schedule }: Props) {
   const [target, setTarget] = useState<Date | null>(null);
   const [enabled, setEnabled] = useState(true); // Default to sound enabled
   const [loading, setLoading] = useState(true);
+  const [testBellPending, setTestBellPending] = useState(false);
 
   useEffect(() => {
     const t = getNextBellDate(schedule, now);
@@ -28,11 +29,8 @@ export default function Countdown({ schedule }: Props) {
     return () => clearTimeout(timer);
   }, [schedule, now]);
 
-  // Load persisted sound preference once on mount
-  useEffect(() => {
-    const persisted = loadSoundEnabled(true); // Default to sound enabled
-    setEnabled(persisted);
-  }, []);
+  // Always start with sound enabled on page load (ignore saved preference)
+  // Note: Sound preference is not persisted - always defaults to enabled
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 250);
@@ -95,7 +93,7 @@ export default function Countdown({ schedule }: Props) {
                     await bellPlayer.unlock();
                   }
                   setEnabled(next);
-                  saveSoundEnabled(next);
+                  // Note: Sound preference is not saved - will reset to enabled on page reload
                 }}
                 className={`relative inline-flex h-6 w-10 items-center rounded-full p-0.5 transition-colors ${
                   enabled ? "bg-[color:var(--accent)]" : "bg-gray-300"
@@ -151,10 +149,21 @@ export default function Countdown({ schedule }: Props) {
 
         <div className="flex justify-center">
           <button
-            onClick={() => bellPlayer.playBellSound()}
-            className="px-3 py-1.5 btn-outline text-sm"
+            onClick={async () => {
+              if (testBellPending) return;
+              setTestBellPending(true);
+              try {
+                await bellPlayer.playBellSound();
+              } finally {
+                setTestBellPending(false);
+              }
+            }}
+            disabled={testBellPending}
+            className={`px-3 py-1.5 btn-outline text-sm transition-opacity ${
+              testBellPending ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Test bell
+            {testBellPending ? "Playing..." : "Test bell"}
           </button>
         </div>
       </div>

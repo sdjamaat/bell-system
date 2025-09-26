@@ -45,7 +45,7 @@ export class BellPlayer {
     }
   }
 
-  async playBellSound() {
+  async playBellSound(): Promise<void> {
     try {
       const ctx = await this.ensureContext();
       const buffer = await this.loadBellSound();
@@ -62,11 +62,20 @@ export class BellPlayer {
       // Skip initial silence at the beginning of the file
       const TRIM_LEAD_SILENCE_SEC = 0.9;
       const offset = Math.min(TRIM_LEAD_SILENCE_SEC, Math.max(0, buffer.duration - 0.01));
-      source.start(0, offset);
+      
+      // Return a promise that resolves when the sound finishes
+      return new Promise<void>((resolve) => {
+        const duration = buffer.duration - offset;
+        source.onended = () => resolve();
+        source.start(0, offset);
+        
+        // Fallback timeout in case onended doesn't fire
+        setTimeout(() => resolve(), duration * 1000 + 100);
+      });
     } catch (error) {
       console.error('Failed to play bell sound:', error);
       // Fallback to generated sound
-      this.playChime();
+      return this.playChime();
     }
   }
 
