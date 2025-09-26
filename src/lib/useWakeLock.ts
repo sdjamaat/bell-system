@@ -10,7 +10,7 @@ interface WakeLock {
   removeEventListener(type: "release", listener: () => void): void;
 }
 
-interface WakeLockSentinel extends WakeLock {}
+type WakeLockSentinel = WakeLock;
 
 interface Navigator {
   wakeLock?: {
@@ -112,7 +112,7 @@ export function useWakeLock() {
         releaseWakeLock();
       }
     };
-  }, [isSupported]); // Intentionally not including requestWakeLock and releaseWakeLock to avoid infinite loops
+  }, [isSupported, requestWakeLock, releaseWakeLock]);
 
   return {
     isSupported,
